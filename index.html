@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raízes do Nordeste — Peça agora</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ═══════════ TOPBAR ═══════════ -->
+<header class="topbar">
+  <div class="topbar-logo">🌵 Raízes <span>do Nordeste</span></div>
+  <div class="topbar-actions">
+    <button class="btn-icon" onclick="navigate('status')" title="Meu pedido">📦<span class="badge" id="orderBadge" style="display:none">1</span></button>
+    <button class="btn-icon" onclick="navigate('cart')" title="Carrinho">🛒<span class="badge" id="cartBadge">0</span></button>
+  </div>
+</header>
+
+<!-- ═══════════ LAYOUT ═══════════ -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Cardápio</div>
+      <a class="sidebar-link active" onclick="navigate('menu')">🍽️ Cardápio</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Pedido</div>
+      <a class="sidebar-link" onclick="navigate('cart')">🛒 Carrinho</a>
+      <a class="sidebar-link" onclick="navigate('checkout')">💳 Finalizar</a>
+      <a class="sidebar-link" onclick="navigate('status')">📦 Acompanhar</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Cliente</div>
+      <a class="sidebar-link" onclick="navigate('loyalty')">⭐ Fidelidade</a>
+      <a class="sidebar-link" onclick="navigate('profile')">👤 Perfil & LGPD</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ───── PAGE: MENU ───── -->
+    <section class="page active" id="page-menu">
+      <div class="hero">
+        <h1>Bom dia, Maria! ☀️</h1>
+        <p>Café fresquinho esperando por você. O que vai ser hoje?</p>
+        <span class="hero-tag">⭐ 340 pontos acumulados</span>
+      </div>
+
+      <div class="unit-bar">
+        <label>📍 Unidade:</label>
+        <select id="unitSelect" onchange="filterByUnit()">
+          <option value="recife">Recife — Boa Vista</option>
+          <option value="fortaleza">Fortaleza — Aldeota</option>
+          <option value="natal">Natal — Ponta Negra</option>
+          <option value="joao_pessoa">João Pessoa — Centro</option>
+        </select>
+      </div>
+
+      <div class="cat-row" id="catRow">
+        <button class="cat-chip active" onclick="filterCat(this,'all')">Todos</button>
+        <button class="cat-chip" onclick="filterCat(this,'cafe')">☕ Cafés</button>
+        <button class="cat-chip" onclick="filterCat(this,'tapioca')">🌾 Tapiocas</button>
+        <button class="cat-chip" onclick="filterCat(this,'cuscuz')">🍽️ Cuscuz</button>
+        <button class="cat-chip" onclick="filterCat(this,'bolo')">🎂 Bolos</button>
+        <button class="cat-chip" onclick="filterCat(this,'suco')">🥤 Sucos</button>
+      </div>
+
+      <h2 class="section-title">Destaques do Dia</h2>
+      <div class="product-grid" id="productGrid"></div>
+    </section>
+
+    <!-- ───── PAGE: CART ───── -->
+    <section class="page" id="page-cart">
+      <h2 class="section-title">🛒 Seu Carrinho</h2>
+      <div class="cart-container">
+        <div id="cartItems"></div>
+        <div id="cartSummary"></div>
+      </div>
+    </section>
+
+    <!-- ───── PAGE: CHECKOUT ───── -->
+    <section class="page" id="page-checkout">
+      <h2 class="section-title">💳 Finalizar Pedido</h2>
+      <div class="checkout-steps">
+        <div class="step done" id="step1">✓ Carrinho</div>
+        <div class="step active" id="step2">Dados</div>
+        <div class="step" id="step3">Pagamento</div>
+        <div class="step" id="step4">Confirmação</div>
+      </div>
+
+      <!-- Sub-step: Dados -->
+      <div id="checkoutData" style="max-width:480px">
+        <div class="form-group">
+          <label class="form-label">Nome completo *</label>
+          <input class="form-input" id="ckName" placeholder="Ex: Maria da Silva" type="text">
+          <div class="form-error" id="errName"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF *</label>
+          <input class="form-input" id="ckCpf" placeholder="000.000.000-00" type="text" maxlength="14" oninput="maskCPF(this)">
+          <div class="form-error" id="errCpf"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail *</label>
+          <input class="form-input" id="ckEmail" placeholder="seu@email.com" type="email">
+          <div class="form-error" id="errEmail"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de retirada *</label>
+          <select class="form-input" id="ckPickup">
+            <option value="">Selecione...</option>
+            <option value="balcao">🏪 Balcão (atendimento presencial)</option>
+            <option value="pickup">⚡ Pick-up rápido</option>
+            <option value="totem">🖥️ Totem (retirar no terminal)</option>
+          </select>
+          <div class="form-error" id="errPickup"></div>
+        </div>
+
+        <!-- LGPD Consent Box -->
+        <div style="background:var(--amarelo-lt);border:1px solid var(--amarelo);border-radius:10px;padding:16px;margin-bottom:18px;">
+          <div style="font-weight:700;color:var(--marrom);margin-bottom:8px;font-size:.88rem;">🔒 Privacidade & LGPD</div>
+          <div class="lgpd-checks">
+            <label class="lgpd-check">
+              <input type="checkbox" id="lgpdBasic" required>
+              <span>Concordo com o uso dos meus dados para processamento deste pedido (obrigatório).</span>
+            </label>
+            <label class="lgpd-check">
+              <input type="checkbox" id="lgpdMarketing">
+              <span>Aceito receber promoções e ofertas personalizadas por e-mail/SMS (opcional).</span>
+            </label>
+            <label class="lgpd-check">
+              <input type="checkbox" id="lgpdLoyalty">
+              <span>Aceito participar do programa de fidelidade com acúmulo de pontos (opcional).</span>
+            </label>
+          </div>
+          <div style="font-size:.72rem;color:var(--cinza-medio);">Seus dados são tratados conforme nossa <a href="#" style="color:var(--marrom)">Política de Privacidade</a> e a Lei 13.709/2018 (LGPD). Você pode revogar seus consentimentos a qualquer momento.</div>
+        </div>
+        <div class="form-error" id="errLgpd"></div>
+
+        <button class="btn-primary" onclick="goToPayment()">Ir para Pagamento →</button>
+      </div>
+
+      <!-- Sub-step: Pagamento -->
+      <div id="checkoutPayment" style="display:none;max-width:480px">
+        <p style="color:var(--cinza-medio);font-size:.85rem;margin-bottom:14px;">O pagamento é processado com segurança por um serviço externo certificado. Raízes do Nordeste não armazena dados do seu cartão.</p>
+
+        <div class="payment-methods">
+          <div class="pay-method" onclick="selectPay(this,'pix')">
+            <div class="pm-icon">⚡</div>
+            <div class="pm-name">PIX</div>
+          </div>
+          <div class="pay-method" onclick="selectPay(this,'cartao_credito')">
+            <div class="pm-icon">💳</div>
+            <div class="pm-name">Crédito</div>
+          </div>
+          <div class="pay-method" onclick="selectPay(this,'cartao_debito')">
+            <div class="pm-icon">💰</div>
+            <div class="pm-name">Débito</div>
+          </div>
+          <div class="pay-method" onclick="selectPay(this,'dinheiro')">
+            <div class="pm-icon">💵</div>
+            <div class="pm-name">Dinheiro</div>
+          </div>
+        </div>
+        <div class="form-error" id="errPay"></div>
+
+        <!-- Card fields (shown when credit/debit selected) -->
+        <div id="cardFields" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Número do Cartão</label>
+            <input class="form-input" placeholder="•••• •••• •••• ••••" maxlength="19" oninput="maskCard(this)">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label class="form-label">Validade</label>
+              <input class="form-input" placeholder="MM/AA" maxlength="5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVV</label>
+              <input class="form-input" placeholder="•••" maxlength="3" type="password">
+            </div>
+          </div>
+        </div>
+
+        <!-- Loyalty discount toggle -->
+        <div id="loyaltyDiscount" style="background:var(--amarelo-lt);border:1px solid var(--amarelo);border-radius:10px;padding:12px;margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.88rem;color:var(--marrom);font-weight:700;">
+            <input type="checkbox" id="useLoyalty" onchange="applyLoyalty()" style="accent-color:var(--marrom)">
+            ⭐ Usar 100 pontos para -R$2,00 de desconto
+          </label>
+        </div>
+
+        <div class="processing-box" id="processingBox">
+          <div class="spinner"></div>
+          <p style="font-size:.88rem;color:var(--cinza-medio);">Aguardando confirmação do serviço de pagamento...</p>
+        </div>
+
+        <div id="payBtns">
+          <button class="btn-primary" onclick="simulatePay()">Confirmar Pagamento</button>
+          <br><br>
+          <button class="btn-secondary" style="width:100%" onclick="showSection('checkoutData');showCheckoutStep(2)">← Voltar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── PAGE: STATUS ───── -->
+    <section class="page" id="page-status">
+      <h2 class="section-title">📦 Acompanhar Pedido</h2>
+      <div id="statusContent">
+        <div class="empty-state">
+          <div class="es-icon">📦</div>
+          <p>Nenhum pedido em andamento.<br>Faça um pedido no cardápio!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── PAGE: LOYALTY ───── -->
+    <section class="page" id="page-loyalty">
+      <h2 class="section-title">⭐ Programa de Fidelidade</h2>
+
+      <div class="loyalty-card">
+        <h2>Seus Pontos</h2>
+        <div class="pts-display" id="ptsDisplay">340</div>
+        <div class="pts-label">pontos acumulados</div>
+        <div class="pts-bar-bg">
+          <div class="pts-bar" id="ptsBar" style="width:34%"></div>
+        </div>
+        <div class="pts-hint">Faltam <strong>160 pontos</strong> para atingir o nível Ouro 🥇</div>
+      </div>
+
+      <h3 class="section-title">Resgatar Recompensas</h3>
+      <div class="rewards-grid">
+        <div class="reward-card">
+          <div class="reward-icon">☕</div>
+          <div class="reward-name">Café Grátis</div>
+          <div class="reward-pts">50 pontos</div>
+          <button class="btn-redeem" onclick="redeem(this,50,'Café Grátis')">Resgatar</button>
+        </div>
+        <div class="reward-card">
+          <div class="reward-icon">🌾</div>
+          <div class="reward-name">Tapioca Grátis</div>
+          <div class="reward-pts">120 pontos</div>
+          <button class="btn-redeem" onclick="redeem(this,120,'Tapioca Grátis')">Resgatar</button>
+        </div>
+        <div class="reward-card">
+          <div class="reward-icon">🎂</div>
+          <div class="reward-name">Bolo de Macaxeira</div>
+          <div class="reward-pts">200 pontos</div>
+          <button class="btn-redeem" onclick="redeem(this,200,'Bolo de Macaxeira')">Resgatar</button>
+        </div>
+        <div class="reward-card">
+          <div class="reward-icon">🥤</div>
+          <div class="reward-name">Combo Completo</div>
+          <div class="reward-pts">300 pontos</div>
+          <button class="btn-redeem" onclick="redeem(this,300,'Combo Completo')">Resgatar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── PAGE: PROFILE ───── -->
+    <section class="page" id="page-profile">
+      <h2 class="section-title">👤 Perfil & Privacidade</h2>
+
+      <div class="profile-card">
+        <div class="avatar">👩</div>
+        <div class="profile-name">Maria da Silva</div>
+        <div class="profile-since">Cliente desde Março 2023 · Nível Prata 🥈</div>
+      </div>
+
+      <div class="profile-card">
+        <div style="font-weight:700;color:var(--marrom);margin-bottom:14px;">🔒 Controle de Privacidade (LGPD)</div>
+        <ul class="privacy-list">
+          <li>
+            <span>📊 Marketing personalizado</span>
+            <div class="privacy-toggle on" id="tog1" onclick="togglePrivacy(this)" title="Receber ofertas"></div>
+          </li>
+          <li>
+            <span>⭐ Programa de fidelidade</span>
+            <div class="privacy-toggle on" id="tog2" onclick="togglePrivacy(this)" title="Acúmulo de pontos"></div>
+          </li>
+          <li>
+            <span>📈 Análise de comportamento</span>
+            <div class="privacy-toggle" id="tog3" onclick="togglePrivacy(this)" title="Análise de hábitos"></div>
+          </li>
+          <li>
+            <span>📧 Notificações por e-mail</span>
+            <div class="privacy-toggle on" id="tog4" onclick="togglePrivacy(this)" title="Receber e-mails"></div>
+          </li>
+        </ul>
+        <p style="font-size:.75rem;color:var(--cinza-medio);margin-top:14px;">Tratamento de dados conforme Lei 13.709/2018 (LGPD). Para exercer seus direitos de acesso, retificação ou exclusão, entre em contato: privacidade@raizesnordeste.com.br</p>
+        <br>
+        <button class="btn-secondary" onclick="showToast('Solicitação de exclusão enviada ao DPO.')">Solicitar exclusão dos meus dados</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══════════ BOTTOM NAV (mobile) ═══════════ -->
+<nav class="bottom-nav">
+  <div class="bnav-item active" id="bn-menu" onclick="navigate('menu')">
+    <span class="ni">🍽️</span><span>Cardápio</span>
+  </div>
+  <div class="bnav-item" id="bn-cart" onclick="navigate('cart')">
+    <span class="ni">🛒</span><span>Carrinho</span>
+  </div>
+  <div class="bnav-item" id="bn-loyalty" onclick="navigate('loyalty')">
+    <span class="ni">⭐</span><span>Pontos</span>
+  </div>
+  <div class="bnav-item" id="bn-profile" onclick="navigate('profile')">
+    <span class="ni">👤</span><span>Perfil</span>
+  </div>
+</nav>
+
+<!-- ═══════════ LGPD MODAL (first visit) ═══════════ -->
+<div class="modal-overlay" id="lgpdModal">
+  <div class="modal">
+    <div class="modal-title">🔒 Sua privacidade importa</div>
+    <div class="modal-text">
+      Antes de continuar, precisamos do seu consentimento para usar seus dados, conforme a <strong>Lei 13.709/2018 (LGPD)</strong>. Você controla como suas informações são usadas.
+    </div>
+    <div class="lgpd-checks">
+      <label class="lgpd-check">
+        <input type="checkbox" id="modalLgpd1" required>
+        <span><strong>Uso básico dos dados</strong> — necessário para o funcionamento do app e processamento de pedidos.</span>
+      </label>
+      <label class="lgpd-check">
+        <input type="checkbox" id="modalLgpd2">
+        <span>Comunicações de marketing e promoções personalizadas (opcional).</span>
+      </label>
+      <label class="lgpd-check">
+        <input type="checkbox" id="modalLgpd3">
+        <span>Programa de fidelidade e análise de hábitos de consumo (opcional).</span>
+      </label>
+    </div>
+    <div style="font-size:.72rem;color:var(--cinza-medio);margin-bottom:16px;">Você pode alterar seus consentimentos a qualquer momento em <strong>Perfil → Privacidade</strong>.</div>
+    <button class="btn-primary" onclick="acceptLgpd()" id="lgpdAcceptBtn">Aceitar e Continuar</button>
+  </div>
+</div>
+
+<!-- ═══════════ TOAST ═══════════ -->
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
